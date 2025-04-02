@@ -34,37 +34,48 @@ frequency_features = [
     "Spectral Centroid",
 ]
 
-common_columns = ["Timestamp", "Subject", "Activity", "Trial", "Tag"]
+common_columns = ["Subject", "Activity", "Trial", "Tag"]
 
 for position in positions:
     headers = data.columns
-    position_columns = common_columns + [
-        column for column in headers if position in column
-    ]
+    position_columns = (
+        ["Timestamp"]
+        + [column for column in headers if position in column]
+        + common_columns
+    )
 
     position_df = data[position_columns]
     position_df.to_csv(f"{position}_dataset.csv", index=False)
-    print(f"{position} -> {position_df.shape}")
+    # print(f"{position} -> {position_df.shape}")
 
-    frequency_domain_columns = common_columns + [
-        column
-        for column in position_columns
-        if any(feature in column for feature in frequency_features)
-    ]
+    frequency_domain_columns = (
+        ["Timestamp"]
+        + [
+            column
+            for column in position_columns
+            if any(feature in column for feature in frequency_features)
+        ]
+        + common_columns
+    )
+
     position_frequency_domain_df = position_df[frequency_domain_columns]
 
     position_frequency_domain_df.to_csv(
         f"{position}_frequency_dataset.csv", index=False
     )
-    print(f"{position}_frequency -> {position_frequency_domain_df.shape}")
+    # print(f"{position}_frequency -> {position_frequency_domain_df.shape}")
 
-    time_domain_columns = common_columns + list(
-        set(position_columns) - set(frequency_domain_columns)
+    time_domain_columns = (
+        ["Timestamp"]
+        + list(set(position_columns) - set(frequency_domain_columns))
+        + common_columns
     )
 
     position_time_df = position_df[time_domain_columns]
 
     position_time_df.to_csv(f"{position}_time_dataset.csv", index=False)
-    print(f"{position}_time -> {position_time_df.shape}")
+    # print(f"{position}_time -> {position_time_df.shape}")
 
 data.to_csv("full_dataset.csv", index=False)
+data[frequency_domain_columns].to_csv("full_frequency_dataset.csv", index=False)
+data[time_domain_columns].to_csv("full_time_dataset.csv", index=False)
